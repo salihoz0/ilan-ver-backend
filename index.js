@@ -1,9 +1,14 @@
 /** @format */
 
 const express = require("express");
-const routes = require("./routes");
+const routes = require("./src/routes");
 const app = express();
+const cors = require("cors");
+
 app.use(express.json());
+
+app.use(cors());
+app.options("*", cors());
 
 app.use("/", routes);
 

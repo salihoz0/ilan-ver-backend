@@ -1,0 +1,46 @@
+// Veritabanı bağlantı bilgileri
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id       Int      @id @default(autoincrement())
+    username String   @unique
+    email    String   @unique
+    password String
+    adress   String?
+    phone    String
+    role     Role     @default(user)
+    isActive Boolean  @default(true)
+    Advert   Advert[]
+}
+
+model Advert {
+    id                  Int          @id @default(autoincrement())
+    title               String
+    description         String
+    price               String
+    location            String
+    advertStatus        advertStatus @default(onayBekliyor)
+    photos              String[]
+    technicalProperties Json
+    subDetails          Json
+    User                User         @relation(fields: [userId], references: [id])
+    userId              Int
+}
+
+enum advertStatus {
+    satista
+    onayBekliyor
+    satildi
+}
+
+enum Role {
+    superAdmin
+    user
+}
