@@ -1,7 +1,7 @@
 /** @format */
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 const database = require("../utils/database");
+const bcrypt = require("bcrypt");
 
 const register = async (req, res) => {
     try {
@@ -13,11 +13,13 @@ const register = async (req, res) => {
                     "Please provide an email, password, username, adress and phone",
             });
         }
+        const cryptedPassword = await bcrypt.hash(password, 10);
+
         try {
             await database.user.create({
                 data: {
                     email,
-                    password,
+                    password: cryptedPassword,
                     username,
                     adress: adress,
                     phone: phone,
@@ -52,8 +54,11 @@ const login = async (req, res) => {
                 message: "Please provide an email and password",
             });
         }
+
+        const cryptedPassword = await bcrypt.hash(password, 10);
+
         const user = await database.user.findFirst({ where: { email: email } });
-        if (user && user.password === password) {
+        if (user && bcrypt.compareSync(cryptedPassword, user.password)) {
             const token = jwt.sign(
                 { username: user.username, role: user.role },
                 "mustafavebeytullah",
@@ -78,14 +83,16 @@ const login = async (req, res) => {
 const changePassword = async (req, res) => {
     try {
         const { password } = req.body;
-        if (!email || !password) {
+        if (!password) {
             return res.status(400).json({
-                message: "Please provide an email and password",
+                message: "Please provide password",
             });
         }
+        const cryptedPassword = await bcrypt.hash(password, 10);
+
         await database.user.update({
             where: { email: req.user.email },
-            data: { password },
+            data: { password: cryptedPassword },
         });
 
         return res.status(200).json({

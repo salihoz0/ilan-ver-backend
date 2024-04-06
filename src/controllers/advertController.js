@@ -135,7 +135,6 @@ const getAdvertList = async (req, res) => {
                     : undefined,
             },
         });
-        console.log(adverts);
         return res.send(adverts);
     } catch (error) {
         return res.status(500).json({
